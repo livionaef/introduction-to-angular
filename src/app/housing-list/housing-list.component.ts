@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { HousingLocation } from '../housing-location';
 
 @Component({
@@ -13,22 +13,36 @@ export class HousingListComponent implements OnInit {
   @Input() locationList: HousingLocation[] = [];
   results: HousingLocation[] = [];
 
+  @Output() locationSelectedEvent = new EventEmitter<HousingLocation>();
+
   ngOnInit(): void {
+  }
+
+  selectHousingLocation(location: HousingLocation) {
+    this.locationSelectedEvent.emit(location);
   }
 
   searchHousingLocations(searchText: string) {
     if (!searchText) return;
 
     this.results = this.locationList
-      .filter( (location: HousingLocation) => 
-        location.city.toLowerCase().includes(searchText.toLowerCase())
+      .filter(location =>
+        this.isLocationSearched(location, searchText)
       )
-      // TODO: Try to use below function instead
   }
 
-  // TODO: Could be extended to more properties...
   private isLocationSearched(location: HousingLocation, searchText: string) {
-    location.city.toLowerCase().includes(searchText.toLowerCase())
+    const locationPropertiesToBeChecked = [
+      location.city.toLowerCase(),
+      location.state.toLowerCase(),
+      location.name.toLowerCase(),
+      location.availableUnits.toString()
+    ]
+
+    // The some() method tests whether at least one element in the array passes the test
+    return locationPropertiesToBeChecked.some(
+      property => property.includes(searchText.toLowerCase())
+    )
   }
 
 }
